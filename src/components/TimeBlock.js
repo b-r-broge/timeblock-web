@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Button } from '@material-ui/core';
+import { Button, TextField, Grid } from '@material-ui/core';
 import Modal from 'react-modal';
 import Activities from './Activities';
 import Schedule from './Schedule';
@@ -16,7 +16,7 @@ class TimeBlock extends Component {
     this.state = {
       // add state
       isModalOpen: false,
-      activities: [],
+      activities: [<Activities index={0} name={'coding'} defaultTime={1} />],
       scheduled: {},
       date: Date.now()
     }
@@ -26,7 +26,13 @@ class TimeBlock extends Component {
 
   addActivity = (e) => {
     e.preventDefault();
-    console.log(e);
+    let active = this.state.activities;
+    // active.push({index:this.state.activities.length+1, name:'coding', defaultTime:3});
+    active.push(<Activities index={this.state.activities.length+1} name={'coding'} defaultTime={1} />)
+    console.log('active', active);
+    this.setState({
+      activities: active
+    })
   }
 
   openModal() {
@@ -39,26 +45,28 @@ class TimeBlock extends Component {
 
   render() {
     return (
-      <div>
-        <div className="activityList">
-          <Button className="mdc-button--raised addActivity" onClick={this.openModal}>Add</Button>
-          {this.state.activities.length === 0 ? null :
-              this.state.activities.map(activity => (
+      <Grid container spacing={16}>
+        <Grid item xs={6} className="activityList">
+          <Button variant="contained" color="primary"
+            onClick={this.addActivity}>
+              Add
+          </Button>
+          {this.state.activities.map( activity => activity)}
+        {/*  {this.state.activities.map(activity => (
                 <Activities
                    key={activity.index}
                    activityName={activity.name}
                    activityDefaultTime={activity.defaultTime}
                 />
-              ))
-          }
-        </div>
-        <div className="schedule">
+            ))} */}
+        </Grid>
+        <Grid item xs={6} className="schedule">
           <Schedule
             date={this.state.date}
             scheduled={this.state.scheduled}
           />
-        </div>
-      </div>
+      </Grid>
+    </Grid>
     );
   }
 }

@@ -1,8 +1,10 @@
-import React, { Component } from 'react';
-import { Button, TextField, Grid } from '@material-ui/core';
-import Modal from 'react-modal';
+import React, {Component} from 'react';
+import {Button, TextField, Grid} from '@material-ui/core';
+import ReactModal from 'react-modal';
 import Activities from './Activities';
 import Schedule from './Schedule';
+
+ReactModal.setAppElement('#root')
 
 class TimeBlock extends Component {
   constructor(props) {
@@ -10,15 +12,18 @@ class TimeBlock extends Component {
 
     //bind functions
     this.addActivity = this.addActivity.bind(this);
+    this.handleChange = this.handleChange.bind(this);
     this.openModal = this.openModal.bind(this);
     this.closeModal = this.closeModal.bind(this);
 
     this.state = {
-      // add state
       isModalOpen: false,
-      activities: [<Activities index={0} name={'coding'} defaultTime={1} />],
+      activities: [<Activities key={0} name={'coding'} defaultTime={1}/>
+        ],
       scheduled: {},
-      date: Date.now()
+      date: Date.now(),
+      activityName: "",
+      activityTime: 1
     }
   }
 
@@ -26,12 +31,19 @@ class TimeBlock extends Component {
 
   addActivity = (e) => {
     e.preventDefault();
+
+    if (this.state.activityName.trim() === "") {
+      return
+    }
+
     let active = this.state.activities;
-    // active.push({index:this.state.activities.length+1, name:'coding', defaultTime:3});
-    active.push(<Activities index={this.state.activities.length+1} name={'coding'} defaultTime={1} />)
-    console.log('active', active);
+    active.push(<Activities key={this.state.activities.length + 1} name={this.state.activityName} defaultTime={this.state.activityTime}/>)
+    this.setState({activityName: "", activityTime: 0, activities: active, isModalOpen: false});
+  }
+
+  handleChange = (e) => {
     this.setState({
-      activities: active
+      [e.target.id]: e.target.value
     })
   }
 
@@ -40,34 +52,31 @@ class TimeBlock extends Component {
   }
 
   closeModal() {
-    this.setState({isModalOpen: false});
+    this.setState({activityName: "", activityTime: 0, isModalOpen: false});
   }
 
   render() {
-    return (
-      <Grid container spacing={16}>
-        <Grid item xs={6} className="activityList">
-          <Button variant="contained" color="primary"
-            onClick={this.addActivity}>
-              Add
-          </Button>
-          {this.state.activities.map( activity => activity)}
-        {/*  {this.state.activities.map(activity => (
-                <Activities
-                   key={activity.index}
-                   activityName={activity.name}
-                   activityDefaultTime={activity.defaultTime}
-                />
-            ))} */}
-        </Grid>
-        <Grid item xs={6} className="schedule">
-          <Schedule
-            date={this.state.date}
-            scheduled={this.state.scheduled}
-          />
+    return (<Grid container={true} spacing={16}>
+      <ReactModal isOpen={this.state.isModalOpen} contentLabel="Add new activity">
+        <form noValidate="noValidate" autoComplete="off">
+          <TextField id="activityName" label="Name" value={this.state.activityName} onChange={this.handleChange} margin="normal"/>
+          <TextField id="activityTime" label="Number of Hours" value={this.state.activityTime} onChange={this.handleChange} type="number" InputLabelProps={{
+              shrink: true
+            }}/>
+          <Button onClick={this.closeModal}>Close Modal</Button>
+          <Button variant="outlined" color="primary" onClick={this.addActivity}>Submit</Button>
+        </form>
+      </ReactModal>
+      <Grid item={true} xs={6} className="activityList">
+        <Button variant="contained" color="primary" onClick={this.openModal}>
+          Add
+        </Button>
+        {this.state.activities.map(activity => activity)}
       </Grid>
-    </Grid>
-    );
+      <Grid item={true} xs={6} className="schedule">
+        <Schedule date={this.state.date} scheduled={this.state.scheduled}/>
+      </Grid>
+    </Grid>);
   }
 }
 
